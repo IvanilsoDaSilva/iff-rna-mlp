@@ -1,159 +1,193 @@
 import java.util.Random;
 
 /**
- * Representa uma rede neural MLP (Perceptron Multicamadas) com uma camada oculta.
+ * Classe que implementa uma rede neural Perceptron Multicamadas (MLP).
+ * Esta classe define a estrutura e os métodos necessários para criar, treinar 
+ * e usar uma rede neural MLP com uma camada de entrada, uma camada oculta e uma camada de saída.
  */
 public class MLP {
-    private double[][] pesosEntradaOculta;
-    private double[][] pesosOcultaSaida;
-    private double taxaAprendizado;
+
+    // Parâmetros da rede
+    private int neuroniosEntrada = 4; // Número de neurônios na camada de entrada
+    private int neuroniosOcultos = 2; // Número de neurônios na camada oculta
+    private int neuroniosSaida = 2;   // Número de neurônios na camada de saída
+    private double taxaAprendizado = 0.5; // Taxa de aprendizado para ajuste dos pesos
+
+    // Pesos e bias
+    private double[][] pesosOcultos; // Pesos entre a camada de entrada e a camada oculta
+    private double[][] pesosSaida; // Pesos entre a camada oculta e a camada de saída
+    private double[] biasOculto; // Bias da camada oculta
+    private double[] biasSaida; // Bias da camada de saída
 
     /**
-     * Construtor da rede neural MLP.
-     *
-     * @param tamanhoEntrada Número de neurônios na camada de entrada.
-     * @param tamanhoOculta Número de neurônios na camada oculta.
-     * @param tamanhoSaida Número de neurônios na camada de saída.
-     * @param taxaAprendizado Taxa de aprendizado para atualizar os pesos.
+     * Construtor da classe MLP.
+     * Este construtor inicializa uma rede neural perceptron multicamadas (MLP) com uma 
+     * camada de entrada, uma camada oculta e uma camada de saída. 
+     * Os parâmetros de configuração da rede, como o número de neurônios em cada camada 
+     * e a taxa de aprendizado, são passados como argumentos. Os pesos e biases são 
+     * inicializados com valores aleatórios para permitir que a rede comece a aprender.
+     * 
+     * @param neuroniosEntrada     Número de neurônios na camada de entrada. Define o tamanho
+     *                             do vetor de entrada da rede.
+     * @param neuroniosOcultos     Número de neurônios na camada oculta. Controla a capacidade
+     *                             da rede de capturar padrões complexos nos dados.
+     * @param neuroniosSaida       Número de neurônios na camada de saída. Define o tamanho do
+     *                             vetor de saída da rede, que pode representar classes de classificação 
+     *                             ou valores contínuos.
+     * @param taxaAprendizado      Taxa de aprendizado usada durante o treinamento da rede. 
+     *                             Controla a velocidade com que a rede ajusta seus pesos durante 
+     *                             o processo de retropropagação.
      */
-    public MLP(int tamanhoEntrada, int tamanhoOculta, int tamanhoSaida, double taxaAprendizado) {
-        pesosEntradaOculta = new double[tamanhoEntrada][tamanhoOculta];
-        pesosOcultaSaida = new double[tamanhoOculta][tamanhoSaida];
+    public MLP(int neuroniosEntrada, int neuroniosOcultos, int neuroniosSaida, double taxaAprendizado) {
+        this.neuroniosEntrada = neuroniosEntrada;
+        this.neuroniosOcultos = neuroniosOcultos;
+        this.neuroniosSaida = neuroniosSaida;
         this.taxaAprendizado = taxaAprendizado;
+        
+        // Inicializar os pesos e bias com valores aleatórios
+        Random rand = new Random();
+        pesosOcultos = new double[this.neuroniosEntrada][this.neuroniosOcultos];
+        pesosSaida = new double[this.neuroniosOcultos][this.neuroniosSaida];
+        biasOculto = new double[this.neuroniosOcultos];
+        biasSaida = new double[this.neuroniosSaida];
 
-        inicializarPesos(pesosEntradaOculta);
-        inicializarPesos(pesosOcultaSaida);
-    }
-
-    /**
-     * Inicializa os pesos com valores aleatórios pequenos.
-     *
-     * @param pesos Matriz de pesos a ser inicializada.
-     */
-    private void inicializarPesos(double[][] pesos) {
-        Random random = new Random();
-        for (int i = 0; i < pesos.length; i++) {
-            for (int j = 0; j < pesos[i].length; j++) {
-                pesos[i][j] = random.nextDouble() * 0.1;  // Inicializa pesos com pequenos valores aleatórios
+        // Inicialização dos pesos da camada oculta
+        for (int i = 0; i < this.neuroniosEntrada; i++) {
+            for (int j = 0; j < this.neuroniosOcultos; j++) {
+                pesosOcultos[i][j] = rand.nextDouble() - 0.5;
             }
+        }
+
+        // Inicialização dos bias da camada oculta
+        for (int j = 0; j < this.neuroniosOcultos; j++) {
+            biasOculto[j] = rand.nextDouble() - 0.5;
+            // Inicialização dos pesos da camada de saída
+            for (int k = 0; k < this.neuroniosSaida; k++) {
+                pesosSaida[j][k] = rand.nextDouble() - 0.5;
+            }
+        }
+
+        // Inicialização dos bias da camada de saída
+        for (int k = 0; k < this.neuroniosSaida; k++) {
+            biasSaida[k] = rand.nextDouble() - 0.5;
         }
     }
 
     /**
-     * Calcula a função de ativação sigmoide.
-     *
-     * @param x Valor de entrada para a função sigmoide.
-     * @return Resultado da função sigmoide.
+     * Função de ativação sigmoid.
+     * A função sigmoid é usada para introduzir não-linearidade na rede neural,
+     * mapeando a entrada para um valor entre 0 e 1.
+     * 
+     * @param x Valor de entrada.
+     * @return Resultado da função sigmoid.
      */
     private double sigmoid(double x) {
-        return 1 / (1 + Math.exp(-x));
+        return 1.0 / (1.0 + Math.exp(-x));
     }
 
     /**
-     * Calcula a derivada da função de ativação sigmoide.
-     *
-     * @param x Valor de entrada para a função sigmoide.
-     * @return Derivada da função sigmoide.
+     * Derivada da função de ativação sigmoid.
+     * Esta função calcula a derivada da função sigmoid, que é usada 
+     * durante o processo de retropropagação para ajustar os pesos da rede.
+     * 
+     * @param x Valor de entrada.
+     * @return Derivada da função sigmoid.
      */
-    private double sigmoidDerivada(double x) {
-        double sigmoid = sigmoid(x);
-        return sigmoid * (1 - sigmoid);
+    private double derivadaSigmoid(double x) {
+        return x * (1.0 - x);
     }
 
     /**
-     * Realiza a propagação para frente (feedforward) na rede neural.
-     *
-     * @param entrada Vetor de entrada para a rede neural.
-     * @return Vetor de saída da rede neural.
+     * Treina a rede neural utilizando o algoritmo de retropropagação.
+     * O treinamento envolve múltiplas iterações (épocas), onde a rede ajusta seus pesos
+     * para minimizar o erro entre as saídas previstas e as saídas esperadas.
+     * 
+     * @param entradas Conjunto de entradas para treinamento. Cada linha representa um exemplo de entrada.
+     * @param saidas Conjunto de saídas esperadas correspondentes ao conjunto de entradas.
+     * @param epocas Número de épocas para o treinamento. Uma época é uma passagem completa pelo conjunto de dados.
      */
-    public double[] feedForward(double[] entrada) {
-        double[] camadaOculta = new double[pesosEntradaOculta[0].length];
-        double[] camadaSaida = new double[pesosOcultaSaida[0].length];
-
-        // Calcula a saída da camada oculta
-        for (int j = 0; j < camadaOculta.length; j++) {
-            camadaOculta[j] = 0;
-            for (int i = 0; i < entrada.length; i++) {
-                camadaOculta[j] += entrada[i] * pesosEntradaOculta[i][j];
-            }
-            camadaOculta[j] = sigmoid(camadaOculta[j]);
-        }
-
-        // Calcula a saída da camada de saída
-        for (int k = 0; k < camadaSaida.length; k++) {
-            camadaSaida[k] = 0;
-            for (int j = 0; j < camadaOculta.length; j++) {
-                camadaSaida[k] += camadaOculta[j] * pesosOcultaSaida[j][k];
-            }
-            camadaSaida[k] = sigmoid(camadaSaida[k]);
-        }
-
-        return camadaSaida;
-    }
-
-    /**
-     * Realiza a retropropagação (backpropagation) para atualizar os pesos da rede neural.
-     *
-     * @param entrada Vetor de entrada para a rede neural.
-     * @param esperado Vetor com os valores esperados de saída.
-     * @param camadaOculta Vetor com os valores da camada oculta.
-     * @param camadaSaida Vetor com os valores da camada de saída.
-     */
-    private void backpropagation(double[] entrada, double[] esperado, double[] camadaOculta, double[] camadaSaida) {
-        // Cálculo do erro na camada de saída
-        double[] errosSaida = new double[camadaSaida.length];
-        double[] gradientesSaida = new double[camadaSaida.length];
-        for (int k = 0; k < camadaSaida.length; k++) {
-            errosSaida[k] = esperado[k] - camadaSaida[k];
-            gradientesSaida[k] = errosSaida[k] * sigmoidDerivada(camadaSaida[k]);
-        }
-
-        // Cálculo do erro na camada oculta
-        double[] errosOculta = new double[camadaOculta.length];
-        double[] gradientesOculta = new double[camadaOculta.length];
-        for (int j = 0; j < camadaOculta.length; j++) {
-            errosOculta[j] = 0;
-            for (int k = 0; k < camadaSaida.length; k++) {
-                errosOculta[j] += gradientesSaida[k] * pesosOcultaSaida[j][k];
-            }
-            gradientesOculta[j] = errosOculta[j] * sigmoidDerivada(camadaOculta[j]);
-        }
-
-        // Atualização dos pesos para a camada de saída
-        for (int j = 0; j < camadaOculta.length; j++) {
-            for (int k = 0; k < camadaSaida.length; k++) {
-                pesosOcultaSaida[j][k] += taxaAprendizado * gradientesSaida[k] * camadaOculta[j];
-            }
-        }
-
-        // Atualização dos pesos para a camada oculta
-        for (int i = 0; i < entrada.length; i++) {
-            for (int j = 0; j < camadaOculta.length; j++) {
-                pesosEntradaOculta[i][j] += taxaAprendizado * gradientesOculta[j] * entrada[i];
-            }
-        }
-    }
-
-    /**
-     * Treina a rede neural com um conjunto de dados de entrada e saída esperada.
-     *
-     * @param entradas Matriz de dados de entrada para treinamento.
-     * @param saidasEsperadas Matriz de dados de saída esperada.
-     * @param epocas Número de épocas para o treinamento.
-     */
-    public void treinar(double[][] entradas, double[][] saidasEsperadas, int epocas) {
-        for (int epoch = 0; epoch < epocas; epoch++) {
+    public void treinar(double[][] entradas, double[][] saidas, int epocas) {
+        for (int epoca = 0; epoca < epocas; epoca++) {
             for (int i = 0; i < entradas.length; i++) {
-                double[] entrada = entradas[i];
-                double[] esperado = saidasEsperadas[i];
+                // Passo para frente (Forward pass)
+                double[] saidaCamadaOculta = new double[this.neuroniosOcultos];
+                double[] saidaCamadaSaida = new double[this.neuroniosSaida];
 
-                // Passo forward
-                double[] camadaOculta = new double[pesosEntradaOculta[0].length];
-                double[] camadaSaida = feedForward(entrada);
+                // Calcular a saída da camada oculta
+                for (int j = 0; j < this.neuroniosOcultos; j++) {
+                    double ativacao = biasOculto[j];
+                    for (int k = 0; k < this.neuroniosEntrada; k++) {
+                        ativacao += entradas[i][k] * pesosOcultos[k][j];
+                    }
+                    saidaCamadaOculta[j] = sigmoid(ativacao);
+                }
 
-                // Retropropagação para atualizar os pesos
-                backpropagation(entrada, esperado, camadaOculta, camadaSaida);
+                // Calcular a saída da camada de saída
+                for (int j = 0; j < this.neuroniosSaida; j++) {
+                    double ativacao = biasSaida[j];
+                    for (int k = 0; k < this.neuroniosOcultos; k++) {
+                        ativacao += saidaCamadaOculta[k] * pesosSaida[k][j];
+                    }
+                    saidaCamadaSaida[j] = sigmoid(ativacao);
+                }
+
+                // Retropropagação para ajustar os pesos da camada de saída
+                double[] erroCamadaSaida = new double[this.neuroniosSaida];
+                for (int j = 0; j < this.neuroniosSaida; j++) {
+                    erroCamadaSaida[j] = saidas[i][j] - saidaCamadaSaida[j];
+                    for (int k = 0; k < this.neuroniosOcultos; k++) {
+                        pesosSaida[k][j] += this.taxaAprendizado * erroCamadaSaida[j] * derivadaSigmoid(saidaCamadaSaida[j]) * saidaCamadaOculta[k];
+                    }
+                    biasSaida[j] += this.taxaAprendizado * erroCamadaSaida[j] * derivadaSigmoid(saidaCamadaSaida[j]);
+                }
+
+                // Retropropagação para ajustar os pesos da camada oculta
+                double[] erroCamadaOculta = new double[this.neuroniosOcultos];
+                for (int j = 0; j < this.neuroniosOcultos; j++) {
+                    erroCamadaOculta[j] = 0.0;
+                    for (int k = 0; k < this.neuroniosSaida; k++) {
+                        erroCamadaOculta[j] += erroCamadaSaida[k] * pesosSaida[j][k];
+                    }
+                    erroCamadaOculta[j] *= derivadaSigmoid(saidaCamadaOculta[j]);
+                    for (int k = 0; k < this.neuroniosEntrada; k++) {
+                        pesosOcultos[k][j] += this.taxaAprendizado * erroCamadaOculta[j] * entradas[i][k];
+                    }
+                    biasOculto[j] += this.taxaAprendizado * erroCamadaOculta[j];
+                }
             }
         }
+    }
+
+    /**
+     * Usa o modelo treinado para prever a saída com base em novas entradas.
+     * A função prever utiliza o modelo já treinado para calcular as saídas
+     * correspondentes a uma nova entrada.
+     * 
+     * @param entrada Vetor de entrada com os valores a serem usados como entrada no modelo.
+     * @return Vetor de saída com as previsões feitas pela rede neural.
+     */
+    public double[] prever(double[] entrada) {
+        double[] saidaCamadaOculta = new double[this.neuroniosOcultos];
+        double[] saidaCamadaSaida = new double[this.neuroniosSaida];
+
+        // Passo para frente na camada oculta
+        for (int j = 0; j < this.neuroniosOcultos; j++) {
+            double ativacao = biasOculto[j];
+            for (int k = 0; k < this.neuroniosEntrada; k++) {
+                ativacao += entrada[k] * pesosOcultos[k][j];
+            }
+            saidaCamadaOculta[j] = sigmoid(ativacao);
+        }
+
+        // Passo para frente na camada de saída
+        for (int j = 0; j < this.neuroniosSaida; j++) {
+            double ativacao = biasSaida[j];
+            for (int k = 0; k < this.neuroniosOcultos; k++) {
+                ativacao += saidaCamadaOculta[k] * pesosSaida[k][j];
+            }
+            saidaCamadaSaida[j] = sigmoid(ativacao);
+        }
+
+        return saidaCamadaSaida;
     }
 }
