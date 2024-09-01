@@ -6,18 +6,18 @@ import java.util.Random;
  * e usar uma rede neural MLP com uma camada de entrada, uma camada oculta e uma camada de saída.
  */
 public class MLP {
-
+    Random rand = new Random();
     // Parâmetros da rede
-    private int neuroniosEntrada = 4; // Número de neurônios na camada de entrada
-    private int neuroniosOcultos = 2; // Número de neurônios na camada oculta
-    private int neuroniosSaida = 2;   // Número de neurônios na camada de saída
-    private double taxaAprendizado = 0.5; // Taxa de aprendizado para ajuste dos pesos
+    private int neuroniosEntrada;   // Número de neurônios na camada de entrada
+    private int neuroniosOcultos;   // Número de neurônios na camada oculta
+    private int neuroniosSaida;     // Número de neurônios na camada de saída
+    private double taxaAprendizado; // Taxa de aprendizado para ajuste dos pesos
 
     // Pesos e bias
-    private double[][] pesosOcultos; // Pesos entre a camada de entrada e a camada oculta
-    private double[][] pesosSaida; // Pesos entre a camada oculta e a camada de saída
-    private double[] biasOculto; // Bias da camada oculta
-    private double[] biasSaida; // Bias da camada de saída
+    private double[][] pesosOcultos;    // Pesos entre a camada de entrada e a camada oculta
+    private double[][] pesosSaida;      // Pesos entre a camada oculta e a camada de saída
+    private double[] biasOculto;        // Bias da camada oculta
+    private double[] biasSaida;         // Bias da camada de saída
 
     /**
      * Construtor da classe MLP.
@@ -45,7 +45,6 @@ public class MLP {
         this.taxaAprendizado = taxaAprendizado;
         
         // Inicializar os pesos e bias com valores aleatórios
-        Random rand = new Random();
         pesosOcultos = new double[this.neuroniosEntrada][this.neuroniosOcultos];
         pesosSaida = new double[this.neuroniosOcultos][this.neuroniosSaida];
         biasOculto = new double[this.neuroniosOcultos];
@@ -60,7 +59,9 @@ public class MLP {
 
         // Inicialização dos bias da camada oculta
         for (int j = 0; j < this.neuroniosOcultos; j++) {
-            biasOculto[j] = rand.nextDouble() - 0.5;
+//          biasOculto[j] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
+            biasOculto[j] = 1; // Inicialização do bias como 1
+
             // Inicialização dos pesos da camada de saída
             for (int k = 0; k < this.neuroniosSaida; k++) {
                 pesosSaida[j][k] = rand.nextDouble() - 0.5;
@@ -69,7 +70,8 @@ public class MLP {
 
         // Inicialização dos bias da camada de saída
         for (int k = 0; k < this.neuroniosSaida; k++) {
-            biasSaida[k] = rand.nextDouble() - 0.5;
+//          biasSaida[k] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
+            biasSaida[k] = 1; // Inicialização do bias como 1
         }
     }
 
