@@ -9,11 +9,12 @@ public class RNA {
     private int neuroniosEntrada;
     private int neuroniosOcultos;
     private int neuroniosSaida;
+    private double[][] pesosOcultos;
+    private double[][] pesosSaida;
     private double taxaAprendizado;
     private AtivacaoStrategy ativacao;
     private boolean mostrarPassos;
-    private double[][] pesosOcultos;
-    private double[][] pesosSaida;
+    private boolean biasAleatorio;
 
     /**
      * Construtor para inicializar uma rede neural MLP com os parâmetros especificados.
@@ -27,38 +28,17 @@ public class RNA {
      */
     public RNA(
             int neuroniosEntrada, int neuroniosOcultos, int neuroniosSaida, double taxaAprendizado,
-            AtivacaoStrategy ativacao, boolean mostrarPassos) {
+            AtivacaoStrategy ativacao, boolean mostrarPassos, boolean biasAleatorio) {
         this.neuroniosEntrada = neuroniosEntrada;
         this.neuroniosOcultos = neuroniosOcultos;
         this.neuroniosSaida = neuroniosSaida;
         this.taxaAprendizado = taxaAprendizado;
         this.ativacao = ativacao;
         this.mostrarPassos = mostrarPassos;
-
-        pesosOcultos = new double[this.neuroniosEntrada + 1][this.neuroniosOcultos];
-        pesosSaida = new double[this.neuroniosOcultos + 1][this.neuroniosSaida];
-
-        for (int i = 0; i < this.neuroniosEntrada + 1; i++) {
-            for (int j = 0; j < this.neuroniosOcultos; j++) {
-                pesosOcultos[i][j] = rand.nextDouble() - 0.5;
-                if (i == 0) {
-//                    pesosOcultos[i][j] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
-                    pesosOcultos[i][j] = 1;
-                }
-            }
-        }
-
-        for (int j = 0; j < this.neuroniosOcultos + 1; j++) {
-            for (int k = 0; k < this.neuroniosSaida; k++) {
-                pesosSaida[j][k] = rand.nextDouble() - 0.5;
-                if (j == 0) {
-//                    pesosOcultos[j][k] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
-                    pesosSaida[j][k] = 1;
-                }
-            }
-        }
+        this.biasAleatorio = biasAleatorio;
 
         this.desenharRede();
+        this.iniciarSinapses();
     }
 
     /**
@@ -68,15 +48,16 @@ public class RNA {
     private void desenharRede() {
         if (this.mostrarPassos) {
             System.out.println("--------------Desenho do RNA");
-            System.out.println("\nNeuronios de entrada com o bias: ");
+            System.out.println("Neuronios de entrada com o bias: ");
             System.out.print("[b]");
             for (int i = 0; i < this.neuroniosEntrada; i++) {
                 System.out.printf("[x%d],", i);
             }
-            System.out.println("\nPesos dos Neuronios ocultos com o bias: ");
+            System.out.println("\nSinapses dos Neuronios ocultos com o bias: ");
             for (int i = 0; i < this.neuroniosEntrada + 1; i++) {
                 for (int j = 0; j < this.neuroniosOcultos; j++) {
-                    System.out.printf("[w%d%d=%.2f],", i, j, pesosOcultos[i][j]);
+//                    System.out.printf("[w%d%d=%.2f],", i, j, pesosSaida[i][j]);
+                    System.out.printf("[w%d%d],", i, j);
                 }
             }
             System.out.println("\nNeuronios ocultos com o bias: ");
@@ -84,10 +65,11 @@ public class RNA {
             for (int i = 0; i < this.neuroniosOcultos; i++) {
                 System.out.printf("[x%d],", i);
             }
-            System.out.println("\nPesos dos neuronios de saida com o bias: ");
+            System.out.println("\nSinapses dos neuronios de saida com o bias: ");
             for (int i = 0; i < this.neuroniosOcultos + 1; i++) {
                 for (int j = 0; j < this.neuroniosSaida; j++) {
-                    System.out.printf("[w%d%d=%.2f],", i, j, pesosSaida[i][j]);
+//                    System.out.printf("[w%d%d=%.2f],", i, j, pesosSaida[i][j]);
+                    System.out.printf("[w%d%d],", i, j);
                 }
             }
             System.out.println("\nNeuronios de saida com o bias: ");
@@ -96,6 +78,35 @@ public class RNA {
                 System.out.printf("[x%d],", i);
             }
         }
+    }
+
+    private void iniciarSinapses(){
+        pesosOcultos = new double[this.neuroniosEntrada + 1][this.neuroniosOcultos];
+        pesosSaida = new double[this.neuroniosOcultos + 1][this.neuroniosSaida];
+
+        for (int i = 0; i < this.neuroniosEntrada + 1; i++) {
+            for (int j = 0; j < this.neuroniosOcultos; j++) {
+                pesosOcultos[i][j] = rand.nextDouble() - 0.5;
+                if (i == 0) {
+                    pesosOcultos[i][j] = 1;
+                    if (biasAleatorio)
+                        pesosOcultos[i][j] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
+                }
+            }
+        }
+
+        for (int i = 0; i < this.neuroniosOcultos + 1; i++) {
+            for (int j = 0; j < this.neuroniosSaida; j++) {
+                pesosSaida[i][j] = rand.nextDouble() - 0.5;
+                if (i == 0) {
+                    pesosSaida[i][j] = 1;
+                    if (biasAleatorio)
+                        pesosOcultos[i][j] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
+                }
+            }
+        }
+
+
     }
 
     /**
