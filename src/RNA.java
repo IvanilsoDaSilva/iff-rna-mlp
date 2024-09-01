@@ -2,7 +2,7 @@ import ativacaostrategy.AtivacaoStrategy;
 import java.util.Random;
 
 /**
- * Representa uma Rede Neural Multilayer Perceptron (MLP) com uma camada oculta.
+ * Representa uma Rede Neural Artificial com camadas ocultas.
  */
 public class RNA {
     Random rand = new Random();

@@ -20,8 +20,10 @@ public class Main {
             {1, 0}
         };
 
+        // Instancia e treino da rede
         RNA mlp = new RNA(
-                4, 2, 2, 0.5, new AtivacaoSigmoideStrategy(), true
+                4, 2, 2, 0.5,
+                new AtivacaoSigmoideStrategy(), true
                 );
         mlp.treinar(entradas, saidas, 10000);
 
