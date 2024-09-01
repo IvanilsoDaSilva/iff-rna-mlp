@@ -26,9 +26,7 @@ public class RNA {
      * @param ativacao           Função de ativação a ser usada nas camadas da rede.
      * @param mostrarPassos      Indica se deve mostrar informações detalhadas sobre a estrutura da rede.
      */
-    public RNA(
-            int neuroniosEntrada, int neuroniosOcultos, int neuroniosSaida, double taxaAprendizado,
-            AtivacaoStrategy ativacao, boolean mostrarPassos, boolean biasAleatorio) {
+    public RNA(int neuroniosEntrada, int neuroniosOcultos, int neuroniosSaida, double taxaAprendizado, AtivacaoStrategy ativacao, boolean mostrarPassos, boolean biasAleatorio) {
         this.neuroniosEntrada = neuroniosEntrada;
         this.neuroniosOcultos = neuroniosOcultos;
         this.neuroniosSaida = neuroniosSaida;
@@ -37,138 +35,13 @@ public class RNA {
         this.mostrarPassos = mostrarPassos;
         this.biasAleatorio = biasAleatorio;
 
-        this.desenharRede();
+        System.out.println("------------------------------------------------------------------------------------------------------------------" +
+                "Desenho do RNA");
+        this.desenharRNA();
+        System.out.println("------------------------------------------------------------------------------------------------------------------" +
+                "Iniciar sinapse");
         this.iniciarSinapses();
-    }
-
-    /**
-     * Desenha a estrutura da rede neural e mostra informações detalhadas sobre os pesos e neurônios,
-     * se a opção 'mostrarPassos' estiver habilitada.
-     */
-    private void desenharRede() {
-        if (this.mostrarPassos) {
-            System.out.println("--------------Desenho do RNA");
-            System.out.println("Neuronios de entrada com o bias: ");
-            System.out.print("[b]");
-            for (int i = 0; i < this.neuroniosEntrada; i++) {
-                System.out.printf("[x%d],", i);
-            }
-            System.out.println("\nSinapses dos Neuronios ocultos com o bias: ");
-            for (int i = 0; i < this.neuroniosEntrada + 1; i++) {
-                for (int j = 0; j < this.neuroniosOcultos; j++) {
-//                    System.out.printf("[w%d%d=%.2f],", i, j, pesosSaida[i][j]);
-                    System.out.printf("[w%d%d],", i, j);
-                }
-            }
-            System.out.println("\nNeuronios ocultos com o bias: ");
-            System.out.print("[b]");
-            for (int i = 0; i < this.neuroniosOcultos; i++) {
-                System.out.printf("[x%d],", i);
-            }
-            System.out.println("\nSinapses dos neuronios de saida com o bias: ");
-            for (int i = 0; i < this.neuroniosOcultos + 1; i++) {
-                for (int j = 0; j < this.neuroniosSaida; j++) {
-//                    System.out.printf("[w%d%d=%.2f],", i, j, pesosSaida[i][j]);
-                    System.out.printf("[w%d%d],", i, j);
-                }
-            }
-            System.out.println("\nNeuronios de saida com o bias: ");
-            System.out.print("[b]");
-            for (int i = 0; i < this.neuroniosSaida; i++) {
-                System.out.printf("[x%d],", i);
-            }
-        }
-    }
-
-    private void iniciarSinapses(){
-        pesosOcultos = new double[this.neuroniosEntrada + 1][this.neuroniosOcultos];
-        pesosSaida = new double[this.neuroniosOcultos + 1][this.neuroniosSaida];
-
-        for (int i = 0; i < this.neuroniosEntrada + 1; i++) {
-            for (int j = 0; j < this.neuroniosOcultos; j++) {
-                pesosOcultos[i][j] = rand.nextDouble() - 0.5;
-                if (i == 0) {
-                    pesosOcultos[i][j] = 1;
-                    if (biasAleatorio)
-                        pesosOcultos[i][j] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
-                }
-            }
-        }
-
-        for (int i = 0; i < this.neuroniosOcultos + 1; i++) {
-            for (int j = 0; j < this.neuroniosSaida; j++) {
-                pesosSaida[i][j] = rand.nextDouble() - 0.5;
-                if (i == 0) {
-                    pesosSaida[i][j] = 1;
-                    if (biasAleatorio)
-                        pesosOcultos[i][j] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
-                }
-            }
-        }
-
-
-    }
-
-    /**
-     * Treina a rede neural usando o algoritmo de retropropagação com o conjunto de dados fornecido.
-     *
-     * @param entradas   Matrizes de entradas de treinamento, onde cada linha representa um exemplo.
-     * @param saidas     Matrizes de saídas esperadas para cada exemplo de treinamento.
-     * @param epocas     Número de épocas para o treinamento.
-     */
-    public void treinar(double[][] entradas, double[][] saidas, int epocas) {
-        for (int epoca = 0; epoca < epocas; epoca++) {
-            for (int i = 0; i < entradas.length; i++) {
-                // Passo para frente (Forward pass)
-                double[] saidaCamadaOculta = new double[this.neuroniosOcultos];
-                double[] saidaCamadaSaida = new double[this.neuroniosSaida];
-
-                // Calcular a saída da camada oculta
-                for (int j = 0; j < this.neuroniosOcultos; j++) {
-                    double ativacao = pesosOcultos[this.neuroniosEntrada][j]; // Bias da camada oculta
-                    for (int k = 0; k < this.neuroniosEntrada; k++) {
-                        ativacao += entradas[i][k] * pesosOcultos[k][j];
-                    }
-                    saidaCamadaOculta[j] = ativacao; // Aplicar a função de ativação
-                    saidaCamadaOculta[j] = this.ativacao.ativar(saidaCamadaOculta[j]);
-                }
-
-                // Calcular a saída da camada de saída
-                for (int j = 0; j < this.neuroniosSaida; j++) {
-                    double ativacao = pesosSaida[this.neuroniosOcultos][j]; // Bias da camada de saída
-                    for (int k = 0; k < this.neuroniosOcultos; k++) {
-                        ativacao += saidaCamadaOculta[k] * pesosSaida[k][j];
-                    }
-                    saidaCamadaSaida[j] = ativacao; // Aplicar a função de ativação
-                    saidaCamadaSaida[j] = this.ativacao.ativar(saidaCamadaSaida[j]);
-                }
-
-                // Retropropagação para ajustar os pesos da camada de saída
-                double[] erroCamadaSaida = new double[this.neuroniosSaida];
-                for (int j = 0; j < this.neuroniosSaida; j++) {
-                    erroCamadaSaida[j] = saidas[i][j] - saidaCamadaSaida[j];
-                    for (int k = 0; k < this.neuroniosOcultos; k++) {
-                        double derivadaAtivacao = this.ativacao.derivada(saidaCamadaSaida[j]);
-                        pesosSaida[k][j] += this.taxaAprendizado * erroCamadaSaida[j] * derivadaAtivacao * saidaCamadaOculta[k];
-                    }
-                    pesosSaida[this.neuroniosOcultos][j] += this.taxaAprendizado * erroCamadaSaida[j] * this.ativacao.derivada(saidaCamadaSaida[j]);
-                }
-
-                // Retropropagação para ajustar os pesos da camada oculta
-                double[] erroCamadaOculta = new double[this.neuroniosOcultos];
-                for (int j = 0; j < this.neuroniosOcultos; j++) {
-                    erroCamadaOculta[j] = 0.0;
-                    for (int k = 0; k < this.neuroniosSaida; k++) {
-                        erroCamadaOculta[j] += erroCamadaSaida[k] * pesosSaida[j][k];
-                    }
-                    erroCamadaOculta[j] *= this.ativacao.derivada(saidaCamadaOculta[j]);
-                    for (int k = 0; k < this.neuroniosEntrada; k++) {
-                        pesosOcultos[k][j] += this.taxaAprendizado * erroCamadaOculta[j] * entradas[i][k];
-                    }
-                    pesosOcultos[this.neuroniosEntrada][j] += this.taxaAprendizado * erroCamadaOculta[j];
-                }
-            }
-        }
+        this.desenharSinapses();
     }
 
     /**
@@ -203,5 +76,220 @@ public class RNA {
         }
 
         return saidaCamadaSaida;
+    }
+
+    public void treinar(double[][] entradas, double[][] saidas, int epocas) {
+        for (int epoca = 0; epoca < epocas; epoca++) {
+            for (int i = 0; i < entradas.length; i++) {
+                // Passo para frente (Forward pass)
+                System.out.println("------------------------------------------------------------------------------------------------------------------" +
+                        "Calcular Saida da camada de entrada");
+                double[] saidaCamadaOculta = calcularSaida(entradas[i], pesosOcultos, this.neuroniosOcultos, this.neuroniosEntrada);
+                System.out.println("------------------------------------------------------------------------------------------------------------------" +
+                        "Calcular Saida da camada de saida");
+                double[] saidaCamadaSaida = calcularSaida(saidaCamadaOculta, pesosSaida, this.neuroniosSaida, this.neuroniosOcultos);
+
+                // Cálculo do erro da camada de saída
+                double[] erroCamadaSaida = calcularErro(saidas[i], saidaCamadaSaida, null, null);
+
+                // Atualização dos pesos da camada de saída
+                atualizarPesos(pesosSaida, erroCamadaSaida, saidaCamadaOculta, this.neuroniosOcultos);
+
+                // Cálculo do erro da camada oculta
+                double[] erroCamadaOculta = calcularErro(null, saidaCamadaOculta, erroCamadaSaida, pesosSaida);
+
+                // Atualização dos pesos da camada oculta
+                atualizarPesos(pesosOcultos, erroCamadaOculta, entradas[i], this.neuroniosEntrada);
+            }
+        }
+    }
+    /**
+     * Calcula a saída de uma camada da rede neural (oculta ou de saída).
+     *
+     * @param entradas         Entradas para a camada atual.
+     * @param pesos            Pesos da camada atual.
+     * @param neuroniosDestino Número de neurônios na camada de destino.
+     * @param neuroniosOrigem  Número de neurônios na camada de origem.
+     * @return                 Saída calculada da camada.
+     */
+    private double[] calcularSaida(double[] entradas, double[][] pesos, int neuroniosDestino, int neuroniosOrigem) {
+        double[] saidas = new double[neuroniosDestino];
+        for (int i = 0; i < neuroniosDestino; i++) {
+            double ativacao = pesos[neuroniosOrigem][i]; // Bias
+            for (int j = 0; j < neuroniosOrigem; j++) {
+                ativacao += entradas[j] * pesos[j][i];
+            }
+            saidas[i] = this.ativacao.ativar(ativacao);
+        }
+        this.desenharCalcularSaida(entradas, pesos, neuroniosDestino, neuroniosOrigem, saidas);
+        return saidas;
+    }
+    /**
+     * Calcula o erro para uma camada da rede neural.
+     *
+     * @param saidasEsperadas Saídas esperadas para o exemplo atual (somente para camada de saída).
+     * @param saidasCalculadas Saídas calculadas pela rede na camada atual.
+     * @param errosCamadaSeguinte Erros da camada seguinte (somente para camada oculta).
+     * @param pesosCamadaSeguinte Pesos que conectam a camada atual à camada seguinte (somente para camada oculta).
+     * @return Vetor de erros da camada atual.
+     */
+    private double[] calcularErro(double[] saidasEsperadas, double[] saidasCalculadas, double[] errosCamadaSeguinte, double[][] pesosCamadaSeguinte) {
+        double[] erro = new double[saidasCalculadas.length];
+
+        // Se saidasEsperadas não for nulo, estamos calculando o erro da camada de saída
+        if (saidasEsperadas != null) {
+            for (int j = 0; j < saidasCalculadas.length; j++) {
+                erro[j] = saidasEsperadas[j] - saidasCalculadas[j];
+                erro[j] *= this.ativacao.derivada(saidasCalculadas[j]);
+            }
+        }
+        // Se errosCamadaSeguinte não for nulo, estamos calculando o erro da camada oculta
+        else if (errosCamadaSeguinte != null && pesosCamadaSeguinte != null) {
+            for (int j = 0; j < erro.length; j++) {
+                double soma = 0.0;
+                for (int k = 0; k < errosCamadaSeguinte.length; k++) {
+                    soma += errosCamadaSeguinte[k] * pesosCamadaSeguinte[j][k];
+                }
+                erro[j] = soma * this.ativacao.derivada(saidasCalculadas[j]);
+            }
+        }
+
+        return erro;
+    }
+    /**
+     * Atualiza os pesos de uma camada com base no erro calculado e nas entradas fornecidas.
+     *
+     * @param pesos           Pesos da camada a serem atualizados.
+     * @param erro            Erros calculados para a camada.
+     * @param entradas        Entradas para a camada atual.
+     * @param neuroniosOrigem Número de neurônios na camada de origem.
+     */
+    private void atualizarPesos(double[][] pesos, double[] erro, double[] entradas, int neuroniosOrigem) {
+        for (int j = 0; j < erro.length; j++) {
+            for (int k = 0; k < neuroniosOrigem; k++) {
+                pesos[k][j] += this.taxaAprendizado * erro[j] * entradas[k];
+            }
+            // Atualização do bias
+            pesos[neuroniosOrigem][j] += this.taxaAprendizado * erro[j];
+        }
+    }
+
+    private void iniciarSinapses(){
+        pesosOcultos = new double[this.neuroniosEntrada + 1][this.neuroniosOcultos];
+        pesosSaida = new double[this.neuroniosOcultos + 1][this.neuroniosSaida];
+
+        for (int i = 0; i < this.neuroniosEntrada + 1; i++) {
+            for (int j = 0; j < this.neuroniosOcultos; j++) {
+                pesosOcultos[i][j] = rand.nextDouble() - 0.5;
+                if (i == 0) {
+                    pesosOcultos[i][j] = 1;
+                    if (biasAleatorio)
+                        pesosOcultos[i][j] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
+                }
+            }
+        }
+
+        for (int i = 0; i < this.neuroniosOcultos + 1; i++) {
+            for (int j = 0; j < this.neuroniosSaida; j++) {
+                pesosSaida[i][j] = rand.nextDouble() - 0.5;
+                if (i == 0) {
+                    pesosSaida[i][j] = 1;
+                    if (biasAleatorio)
+                        pesosOcultos[i][j] = rand.nextDouble() - 0.5; // Inicialização do bias aleatorio
+                }
+            }
+        }
+    }
+
+    private void desenharRNA() {
+        if (this.mostrarPassos) {
+            System.out.println("Neuronios de entrada com o bias: ");
+            System.out.print("[b]");
+            for (int i = 0; i < this.neuroniosEntrada; i++) {
+                System.out.printf("[x%d]", i);
+            }
+            System.out.println("\nSinapses dos Neuronios ocultos com o bias: ");
+            for (int i = 0; i < this.neuroniosEntrada + 1; i++) {
+                for (int j = 0; j < this.neuroniosOcultos; j++) {
+                    System.out.printf("[w%d%d]", j, i);
+                }
+            }
+            System.out.println("\nNeuronios ocultos com o bias: ");
+            System.out.print("[b]");
+            for (int i = 0; i < this.neuroniosOcultos; i++) {
+                System.out.printf("[x%d]", i);
+            }
+            System.out.println("\nSinapses dos neuronios de saida com o bias: ");
+            for (int i = 0; i < this.neuroniosOcultos + 1; i++) {
+                for (int j = 0; j < this.neuroniosSaida; j++) {
+                    System.out.printf("[w%d%d]", j, i);
+                }
+            }
+            System.out.println("\nNeuronios de saida com o bias: ");
+            System.out.print("[b]");
+            for (int i = 0; i < this.neuroniosSaida; i++) {
+                System.out.printf("[x%d]", i);
+            }
+            System.out.println();
+        }
+    }
+    private void desenharConjuntoTreinamento() {
+        if (this.mostrarPassos) {
+
+        }
+    }
+    private void desenharSinapses(){
+        if (this.mostrarPassos) {
+            System.out.print("Camada de entrada:\n");
+            for (int i = 0; i < this.neuroniosOcultos; i++) {
+                System.out.print("wi="+i+"[");
+                for (int j = 0; j < this.neuroniosEntrada+1; j++) {
+                    System.out.printf("%6.1f, ", pesosOcultos[j][i]);
+                }
+                System.out.print("]\n");
+            }
+            System.out.print("Camada escondida:");
+            for (int i = 0; i < this.neuroniosSaida; i++) {
+                System.out.print("\nwj="+i+"[");
+                for (int j = 0; j < this.neuroniosSaida+1; j++) {
+                    System.out.printf("%6.1f, ", pesosSaida[j][i]);
+                }
+                System.out.print("]");
+            }
+            System.out.println();
+        }
+    }
+    private void desenharCalcularSaida(double[] entradas, double[][] pesos, int neuroniosDestino, int neuroniosOrigem, double[] saida) {
+        if (this.mostrarPassos) {
+            // Exibindo a camada de entrada
+            System.out.print("Camada de entrada:\n[ ");
+            for (int i = 0; i < neuroniosOrigem; i++) {
+                System.out.printf("%4.1f ", entradas[i]);
+            }
+            System.out.println("]");
+
+            // Exibindo a matriz de pesos no sentido contrário
+            System.out.println("Matriz de pesos (exibida no sentido contrário):");
+            for (int j = 0; j < neuroniosOrigem; j++) {
+                System.out.print("[ ");
+                for (int i = 0; i < neuroniosDestino; i++) {
+                    System.out.printf("%6.1f ", pesos[j][i]);
+                }
+                System.out.println("]");
+            }
+
+            // Visualização da multiplicação
+            System.out.println("Visualização da multiplicação:");
+            for (int i = 0; i < neuroniosDestino; i++) {
+                System.out.print("[ ");
+                for (int j = 0; j < neuroniosOrigem; j++) {
+                    System.out.printf("%6.1f * %6.1f", entradas[j], pesos[j][i]);
+                    if (j < neuroniosOrigem - 1) {
+                        System.out.print(" + ");
+                    }
+                }
+                System.out.printf(" ] = %6.1f \n", saida[i]);
+            }
+        }
     }
 }
