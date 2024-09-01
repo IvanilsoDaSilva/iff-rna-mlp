@@ -24,6 +24,14 @@ Inicialização Aleatória: Os bias são definidos com valores aleatórios para 
 
 Inicialização com Valor Constante: Inicializar os bias com valores fixos, como 1, é mais simples, mas pode levar à simetria excessiva entre os neurônios e dificultar o aprendizado eficaz, especialmente em redes profundas.
 
+- Utilização do padrão Strategy para optar pela ativação binária ou sigmoide
+
+Nesse ponto, fiz a observação de que a ativação binária pode ser imprecisa, isso pois ela da valores exatos como 100% ou 0% do resultados que é necessario a incerteza.
+
+A sigmoide por outro lado nos da valores de incerteza, isso é: Resultados próximos de 100% ou 0%, mas nunca exatos. Isso torna esta função de ativação mais precisa.
+
+Para utilizar uma função de ativação, basta que na classe que implemente o método main seja instanciada a classe da função de ativação que deseja, como as já criadas 'AtivaçãoBinariaStrategy' e 'AtivacaoSigmoideStrategy', ou sua propria função ativação implementando a interface 'AtivaçãoStrategy' e passe por parâmetro no construtor do RNA.
+
 <h2 align="right">3. TECHNOLOGIES 💻</h2>
 
 <div style="display: inline_block">
