@@ -33,7 +33,6 @@ public class Main {
 
         double[] resultado = mlp.prever(entradaTeste);
         System.out.println();
-        System.out.println();
         System.out.println("Gripe: " + resultado[0]);
         System.out.println("Dengue: " + resultado[1]);
     }
