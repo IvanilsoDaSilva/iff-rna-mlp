@@ -9,4 +9,9 @@ public class AtivacaoSigmoideStrategy implements AtivacaoStrategy {
     public double derivada(double x) {
         return x * (1.0 - x);
     }
+
+    @Override
+    public String getExpressao() {
+        return "yi = 1.0 / (1.0 + e^(-vi))";
+    }
 }

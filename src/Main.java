@@ -25,7 +25,7 @@ public class Main {
                 4, 2, 2, 0.5,
                 new AtivacaoSigmoideStrategy(), true, false
                 );
-        mlp.treinar(entradas, saidas, 1000);
+        mlp.treinar(entradas, saidas, 1);
 
         // Testar a rede com novas entradas
 //        double[] entradaTeste = {1, 0, 1, 0}; //gripe
